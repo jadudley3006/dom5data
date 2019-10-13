@@ -58,7 +58,7 @@ public class ItemService {
 
         String id = attributes.get("id");
         for (String key : attributes.keySet()) {
-
+            //TODO map to entity and save
         }
 
     }
