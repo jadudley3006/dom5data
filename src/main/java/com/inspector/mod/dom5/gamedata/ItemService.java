@@ -1,15 +1,11 @@
 package com.inspector.mod.dom5.gamedata;
 
-import com.inspector.mod.dom5.repositories.ItemEntity;
+import com.inspector.mod.dom5.repositories.*;
 import com.inspector.mod.dom5.gamedata.models.Item;
-import com.inspector.mod.dom5.repositories.ItemAttributeEntity;
-import com.inspector.mod.dom5.repositories.ItemAttributeRepository;
-import com.inspector.mod.dom5.repositories.ItemRepository;
 import com.inspector.mod.dom5.util.CsvReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.inspector.mod.dom5.gamedata.GameData.BASE_I_CSV;
+import static com.inspector.mod.dom5.gamedata.GameData.WEAPONS_CSV;
 
 @Service
 public class ItemService {
@@ -40,15 +37,18 @@ public class ItemService {
     private ItemAttributeRepository itemAttributeRepository;
 
     @Autowired
+    private WeaponRepository weaponRepository;
+
+    @Autowired
     private CsvReader csvReader;
 
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         List<String[]> raw_items = csvReader.processInputFile(BASE_I_CSV);
         String[] headers = raw_items.get(0);
         raw_items.stream().skip(1).forEach(element -> processItem(headers, element));
 
-        List<String[]> raw_weapons = csvReader.processInputFile(BASE_I_CSV);
+        List<String[]> raw_weapons = csvReader.processInputFile(WEAPONS_CSV);
         String[] weapon_headers = raw_weapons.get(0);
         raw_weapons.stream().skip(1).forEach(element -> processWeapon(weapon_headers, element));
     }
@@ -56,11 +56,21 @@ public class ItemService {
     private void processWeapon(String[] headers, String[] element) {
         Map<String, String> attributes = getAttributes(headers, element);
 
-        String id = attributes.get("id");
-        for (String key : attributes.keySet()) {
-            //TODO map to entity and save
-        }
+        WeaponEntity weaponEntity = WeaponEntity.builder()
+                .id(Integer.parseInt(attributes.get("id")))
+                .name(attributes.get("name"))
+                .att(Integer.parseInt(attributes.get("att")))
+                .def(Integer.parseInt(attributes.get("def")))
+                .ammo(Integer.parseInt(attributes.get("ammo")))
+                .effect_record_id(Integer.parseInt(attributes.get("effect_record_id")))
+                .len(Integer.parseInt(attributes.get("len")))
+                .nratt(Integer.parseInt(attributes.get("nratt")))
+                .rcost(Integer.parseInt(attributes.get("rcost")))
+                .secondaryeffect(Integer.parseInt(attributes.get("secondaryeffect")))
+                .secondaryeffectalways(Integer.parseInt(attributes.get("secondaryeffectalways")))
+                .build();
 
+        weaponRepository.save(weaponEntity);
     }
 
     public List<Item> getItems() {

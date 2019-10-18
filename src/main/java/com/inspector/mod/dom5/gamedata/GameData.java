@@ -44,4 +44,8 @@ public class GameData {
     public static final String ATTRIBUTES_BY_WEAPON_CSV = "gamedata/attributes_by_weapon.csv";
     public static final String ATTRIBUTES_BY_ARMOR_CSV = "gamedata/attributes_by_armor.csv";
     public static final String NAMETYPES_CSV = "gamedata/nametypes.csv";
+
+    public static final String ITEM_DESCRIPTIONS = "gamedata/itemdescr";
+    public static final String SPELL_DESCRIPTIONS = "gamedata/spelldescr";
+    public static final String UNIT_DESCRIPTIONS = "gamedata/unitdescr";
 }
