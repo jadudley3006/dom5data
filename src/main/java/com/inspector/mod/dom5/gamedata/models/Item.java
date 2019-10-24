@@ -20,6 +20,7 @@ public class Item {
     private Integer armor;
     private String type;
     private Map<String, String> attributes;
+    private String description;
 
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -33,6 +34,7 @@ public class Item {
         stringBuilder.append("weapon: ").append(weapon).append("\n");
         stringBuilder.append("armor: ").append(armor).append("\n");
         stringBuilder.append("type: ").append(type).append("\n");
+        stringBuilder.append("description: ").append(description).append("\n");
         attributes.forEach((s, s2) -> stringBuilder.append("\t").append(s).append(": ").append(s2).append("\n"));
         return stringBuilder.toString();
     }

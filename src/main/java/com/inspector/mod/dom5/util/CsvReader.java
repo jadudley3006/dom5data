@@ -6,7 +6,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,5 +27,15 @@ public class CsvReader {
             System.out.println("unable to read file " + inputFilePath);
         }
         return elements;
+    }
+
+    public static Map<String, String> getKeyValuePairs(String[] headers, String[] element) {
+        Map<String, String> attributes = new HashMap<>();
+        for (int i = 0; i < element.length; i++) {
+            if (element[i] != null && element[i].length() > 0) {
+                attributes.put(headers[i], element[i]);
+            }
+        }
+        return attributes;
     }
 }

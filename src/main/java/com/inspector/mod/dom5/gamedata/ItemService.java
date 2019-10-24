@@ -6,17 +6,19 @@ import com.inspector.mod.dom5.util.CsvReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.PostConstruct;
+import java.security.Key;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.inspector.mod.dom5.gamedata.GameData.BASE_I_CSV;
 import static com.inspector.mod.dom5.gamedata.GameData.WEAPONS_CSV;
+import static com.inspector.mod.dom5.util.CsvReader.getKeyValuePairs;
 
 @Service
 public class ItemService {
+
+    private List<Item> items = new ArrayList<>();
 
     private static final String ID = "id";
     private static final String NAME = "name";
@@ -30,104 +32,46 @@ public class ItemService {
     private static final String TYPE = "type";
     private static final List<String> PRIMARY_ATTRIBUTES = Arrays.asList(ID, NAME, CONSTLEVEL, MAINPATH, MAINLEVEL, SECONDARYPATH, SECONDARYLEVEL, WEAPON, ARMOR, TYPE);
 
-    @Autowired
-    private ItemRepository itemRepository;
+//    @Autowired
+//    private ItemRepository itemRepository;
+//
+//    @Autowired
+//    private ItemAttributeRepository itemAttributeRepository;
+//
+//    @Autowired
+//    private WeaponRepository weaponRepository;
 
     @Autowired
-    private ItemAttributeRepository itemAttributeRepository;
-
-    @Autowired
-    private WeaponRepository weaponRepository;
+    private ItemDescriptionService itemDescriptionService;
 
     @Autowired
     private CsvReader csvReader;
 
-//    @PostConstruct
+    @PostConstruct
     public void init() {
         List<String[]> raw_items = csvReader.processInputFile(BASE_I_CSV);
         String[] headers = raw_items.get(0);
         raw_items.stream().skip(1).forEach(element -> processItem(headers, element));
 
-        List<String[]> raw_weapons = csvReader.processInputFile(WEAPONS_CSV);
-        String[] weapon_headers = raw_weapons.get(0);
-        raw_weapons.stream().skip(1).forEach(element -> processWeapon(weapon_headers, element));
-    }
-
-    private void processWeapon(String[] headers, String[] element) {
-        Map<String, String> attributes = getAttributes(headers, element);
-
-        WeaponEntity weaponEntity = WeaponEntity.builder()
-                .id(Integer.parseInt(attributes.get("id")))
-                .name(attributes.get("name"))
-                .att(Integer.parseInt(attributes.get("att")))
-                .def(Integer.parseInt(attributes.get("def")))
-                .ammo(Integer.parseInt(attributes.get("ammo")))
-                .effect_record_id(Integer.parseInt(attributes.get("effect_record_id")))
-                .len(Integer.parseInt(attributes.get("len")))
-                .nratt(Integer.parseInt(attributes.get("nratt")))
-                .rcost(Integer.parseInt(attributes.get("rcost")))
-                .secondaryeffect(Integer.parseInt(attributes.get("secondaryeffect")))
-                .secondaryeffectalways(Integer.parseInt(attributes.get("secondaryeffectalways")))
-                .build();
-
-        weaponRepository.save(weaponEntity);
+//        List<String[]> raw_weapons = csvReader.processInputFile(WEAPONS_CSV);
+//        String[] weapon_headers = raw_weapons.get(0);
+//        raw_weapons.stream().skip(1).forEach(element -> processWeapon(weapon_headers, element));
     }
 
     public List<Item> getItems() {
-        return itemRepository.findAll().stream()
-                .map(this::mapToItem)
-                .collect(Collectors.toList());
-    }
-
-    private Item mapToItem(ItemEntity itemEntity) {
-        return Item.builder()
-                .id(itemEntity.getId())
-                .name(itemEntity.getName())
-                .type(itemEntity.getType())
-                .weapon(itemEntity.getWeapon())
-                .armor(itemEntity.getArmor())
-                .constlevel(itemEntity.getConstlevel())
-                .mainpath(itemEntity.getMainpath())
-                .mainlevel(itemEntity.getMainlevel())
-                .secondarypath(itemEntity.getSecondarypath())
-                .secondarylevel(itemEntity.getSecondarylevel())
-                .attributes(itemEntity.getItemAttributes().stream().collect(Collectors.toMap(ItemAttributeEntity::getKey, ItemAttributeEntity::getValue)))
-                .build();
+        return items;
     }
 
     private void processItem(String[] headers, String[] element) {
-        Map<String, String> attributes = getAttributes(headers, element);
+        Map<String, String> attributes = getKeyValuePairs(headers, element);
 
-        ItemEntity item = getItemEntity(attributes);
-        itemRepository.save(item);
+        Item item = getItem(attributes);
 
-        for (String key : attributes.keySet()) {
-            if (!PRIMARY_ATTRIBUTES.contains(key)) {
-                ItemAttributeEntity itemAttributeEntity = getItemAttributeEntity(attributes, item, key);
-                itemAttributeRepository.save(itemAttributeEntity);
-            }
-        }
+        items.add(item);
     }
 
-    private ItemAttributeEntity getItemAttributeEntity(Map<String, String> attributes, ItemEntity item, String key) {
-        return ItemAttributeEntity.builder()
-                .item_Id(item.getId())
-                .key(key)
-                .value(attributes.get(key)).build();
-    }
-
-    private Map<String, String> getAttributes(String[] headers, String[] element) {
-        Map<String, String> attributes = new HashMap<>();
-        for (int i = 0; i < element.length; i++) {
-            if (element[i] != null && element[i].length() > 0) {
-                attributes.put(headers[i], element[i]);
-            }
-        }
-        return attributes;
-    }
-
-    private ItemEntity getItemEntity(Map<String, String> attributes) {
-        return ItemEntity.builder()
+    private Item getItem(Map<String, String> attributes) {
+        return Item.builder()
                 .name(attributes.get(NAME))
                 .constlevel(Integer.parseInt(attributes.get(CONSTLEVEL)))
                 .mainpath(attributes.get(MAINPATH))
@@ -137,7 +81,17 @@ public class ItemService {
                 .weapon(attributes.get(WEAPON) != null ? Integer.parseInt(attributes.get(WEAPON)) : null)
                 .armor(attributes.get(ARMOR) != null ? Integer.parseInt(attributes.get(ARMOR)) : null)
                 .type(attributes.get(TYPE))
+                .attributes(getAttributes(attributes))
+                .description(itemDescriptionService.getItemDescription(attributes.get(NAME)))
                 .build();
+    }
+
+    private Map<String, String> getAttributes(Map<String, String> attributes) {
+        Map<String, String> additionalAttributes = new HashMap<>();
+        attributes.keySet().stream()
+                .filter(key -> !PRIMARY_ATTRIBUTES.contains(key))
+                .forEach(key -> additionalAttributes.put(key, attributes.get(key)));
+        return additionalAttributes;
     }
 
 }

@@ -1,4 +1,4 @@
-package com.inspector.mod.dom5.gamedata;
+package com.inspector.mod.dom5.util;
 
 import org.springframework.stereotype.Service;
 
