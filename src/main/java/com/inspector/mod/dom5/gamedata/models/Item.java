@@ -9,7 +9,6 @@ import java.util.Map;
 @Builder
 public class Item {
 
-    private int id;
     private String name;
     private Integer constlevel;
     private String mainpath;
@@ -24,7 +23,6 @@ public class Item {
 
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("id: ").append(id).append("\n");
         stringBuilder.append("name: ").append(name).append("\n");
         stringBuilder.append("constlevel: ").append(constlevel).append("\n");
         stringBuilder.append("mainpath: ").append(mainpath).append("\n");
