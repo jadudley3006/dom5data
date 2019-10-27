@@ -1,18 +1,14 @@
 package com.inspector.mod.dom5.gamedata;
 
-import com.inspector.mod.dom5.repositories.*;
 import com.inspector.mod.dom5.gamedata.models.Item;
 import com.inspector.mod.dom5.util.CsvReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.security.Key;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.inspector.mod.dom5.gamedata.GameData.BASE_I_CSV;
-import static com.inspector.mod.dom5.gamedata.GameData.WEAPONS_CSV;
 import static com.inspector.mod.dom5.util.CsvReader.getKeyValuePairs;
 
 @Service
@@ -32,15 +28,6 @@ public class ItemService {
     private static final String TYPE = "type";
     private static final List<String> PRIMARY_ATTRIBUTES = Arrays.asList(ID, NAME, CONSTLEVEL, MAINPATH, MAINLEVEL, SECONDARYPATH, SECONDARYLEVEL, WEAPON, ARMOR, TYPE);
 
-//    @Autowired
-//    private ItemRepository itemRepository;
-//
-//    @Autowired
-//    private ItemAttributeRepository itemAttributeRepository;
-//
-//    @Autowired
-//    private WeaponRepository weaponRepository;
-
     @Autowired
     private ItemDescriptionService itemDescriptionService;
 
@@ -52,10 +39,6 @@ public class ItemService {
         List<String[]> raw_items = csvReader.processInputFile(BASE_I_CSV);
         String[] headers = raw_items.get(0);
         raw_items.stream().skip(1).forEach(element -> processItem(headers, element));
-
-//        List<String[]> raw_weapons = csvReader.processInputFile(WEAPONS_CSV);
-//        String[] weapon_headers = raw_weapons.get(0);
-//        raw_weapons.stream().skip(1).forEach(element -> processWeapon(weapon_headers, element));
     }
 
     public List<Item> getItems() {
